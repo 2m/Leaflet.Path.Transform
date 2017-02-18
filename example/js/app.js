@@ -11,7 +11,7 @@ L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {
   // crs: L.CRS.EPSG4326 // that was tested as well
-}).setView([58.3683942, 26.6840315], 13);
+}).setView([51.5074, 0.1278], 13);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   attribution: '&copy; ' +
@@ -91,6 +91,7 @@ function onTransform(params) {
         console.log(json);
         var polyline = L.Polyline.fromEncoded(json.paths[0].points);
         console.log(polyline);
+
 
         polyline.addTo(map);
         routedPoly = polyline;
@@ -228,3 +229,50 @@ function shapeSelected(shape) {
 }
 
 document.querySelector('#shape').addEventListener("change", shapeSelected);
+
+function imageSelected(input) {
+    console.log("image selected");
+    console.log(input);
+
+    var file = input.files[0],
+        reader = new FileReader(),
+        url = '/api/conversions';
+
+    reader.onload = function(e) {
+
+        fetch(url, {
+            method: 'post',
+            headers: {
+                "Content-Type": "image/png"
+            },
+            body: e.currentTarget.result
+        })
+        .then(json)
+        .then(function(data) {
+            console.log('Request succeeded with JSON response', data);
+        } )
+        .catch(function(error) {
+            console.log('Request failed', error);
+        });
+
+    }.bind(this);
+
+    reader.readAsText(file);
+
+}
+
+$("#img").change(function(){
+    imageSelected(this);
+});
+
+$("#upload").click(function() {
+    fetch("https://mapy-me-share.herokuapp.com/route", {
+        method: 'post',
+        body: JSON.stringify(routedPoly.toGeoJSON())
+    }).then(function(response) {
+        return response.json();
+    }).then(function(json) {
+        $("#resultUrl").attr("href", json.url);
+        $("#resultUrl").text = json.url;
+    });
+});
