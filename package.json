@@ -4,7 +4,7 @@
   "description": "Scale/rotate/move plugin for leaflet vector layers ",
   "main": "index.js",
   "scripts": {
-    "prestart": "npm install",
+    "prestart": "rm -rf node_modules/svg-to-geojson/node_modules/*/.git & npm install",
     "test": "tape test/*.js",
     "start": "npm run watch & npm run server",
     "server": "http-server -p 3001",
@@ -28,8 +28,10 @@
   "author": "Alexander Milevski <info@w8r.name>",
   "license": "MIT",
   "dependencies": {
+    "jquery": "^3.1.1",
     "leaflet-path-drag": "^1.0.1",
     "polyline-encoded": "0.0.8",
+    "svg-to-geojson": "^1.0.0",
     "togpx": "^0.5.3"
   },
   "devDependencies": {

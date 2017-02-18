@@ -3,6 +3,9 @@ var DragHandler = require('../../index');
 var togpx = require('togpx');
 var polyUtil = require('polyline-encoded');
 
+var svggeoj = require("svg-to-geojson");
+var $ = require("jquery");
+
 L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,3 +151,80 @@ function update() {
 });
 
 update();
+
+function shapeSelected(shape) {
+    var selected = shape.target.selectedOptions[0].value;
+
+    const options = {
+        method: "GET",
+        headers: new Headers({'content-type': 'image/svg+xml'}),
+    };
+
+    fetch(selected, options)
+        .then(function(response) {
+            console.log("in first andThen");
+            return response.text();
+        })
+        .then(function(text) {
+            console.log($(text)[0]);
+
+            var b = map.getBounds();
+
+            var geojson = svggeoj.svgtogeojson.svgToGeoJson(
+                [[b.getNorth(), b.getEast()], [b.getSouth(), b.getWest()]],
+                $(text)[0]
+            );
+
+            console.log([[b.getNorth(), b.getEast()], [b.getSouth(), b.getWest()]]);
+
+            console.log(geojson);
+
+            console.log();
+
+            //map.removeLayer(polygon);
+
+            var p = new L.Polygon(
+                L.GeoJSON.coordsToLatLngs(
+                    geojson.features[0].geometry.coordinates[0]
+                ),{
+                     color: '#f00',
+                     interactive: true,
+                     draggable: true,
+                     transform: true
+                }).addTo(map);
+            p.transform.enable();
+            p.on('transformed', onTransform);
+
+            polygon.transform.disable();
+            polygon.removeFrom(map);
+
+            polygon = p;
+
+            /*var poly = L.GeoJSON(geojson.features[0], {
+                interactive: true,
+                draggable: true,
+                transform: true
+            }).addTo(map);*/
+
+            //polygon.clearLayers();
+            //polygon.addData(geojson.features[0]);
+
+            // var myLayer = L.geoJSON([], {
+            //     color: '#f00',
+            //     interactive: true,
+            //     draggable: true,
+            //     transform: true
+            // }).addTo(map);
+            // myLayer.addData(geojson.features[0]);
+
+            //L.GeoJSON(geojson);
+
+            //console.log(poly);
+        })
+        .catch(function(error) {
+            console.log('There has been a problem with your fetch operation: ' + error.message);
+        });
+
+}
+
+document.querySelector('#shape').addEventListener("change", shapeSelected);
