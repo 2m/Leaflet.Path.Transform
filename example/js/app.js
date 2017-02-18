@@ -185,9 +185,9 @@ function shapeSelected(shape) {
             //map.removeLayer(polygon);
 
             var p = new L.Polygon(
-                L.GeoJSON.coordsToLatLngs(
-                    geojson.features[0].geometry.coordinates[0]
-                ),{
+                geojson
+                    .features
+                    .map(coords => L.GeoJSON.coordsToLatLngs(coords.geometry.coordinates[0])), {
                      color: '#f00',
                      interactive: true,
                      draggable: true,
@@ -266,13 +266,26 @@ $("#img").change(function(){
 });
 
 $("#upload").click(function() {
+
+    var source = null;
+    if ($("#uploadSource").value == "routed") {
+        source = routedPoly;
+    } else {
+        source = polygon;
+    }
+
+    console.log(JSON.stringify(source.toGeoJSON()));
+
     fetch("https://mapy-me-share.herokuapp.com/route", {
         method: 'post',
-        body: JSON.stringify(routedPoly.toGeoJSON())
+        body: JSON.stringify(source.toGeoJSON())
     }).then(function(response) {
         return response.json();
     }).then(function(json) {
-        $("#resultUrl").attr("href", json.url);
-        $("#resultUrl").text = json.url;
+        $("#resultUrl").value = json.url;
     });
+});
+
+$("#tartu").click(function(){
+    map.setView(new L.LatLng(58.3776, 26.7190), 13);
 });
