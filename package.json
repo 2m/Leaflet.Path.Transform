@@ -28,7 +28,9 @@
   "author": "Alexander Milevski <info@w8r.name>",
   "license": "MIT",
   "dependencies": {
-    "leaflet-path-drag": "^1.0.1"
+    "leaflet-path-drag": "^1.0.1",
+    "polyline-encoded": "0.0.8",
+    "togpx": "^0.5.3"
   },
   "devDependencies": {
     "browserify": "^13.1.0",
